@@ -227,7 +227,7 @@ public class GUI extends JFrame {
         });
     }
 
-    private void scanDir(File dir, DefaultListModel<String> model) {
+    private void scanDir(String parent, File dir, DefaultListModel<String> model) {
         System.out.println(dir + ":");
         File[] files = dir.listFiles();
         if (files != null) {
@@ -235,10 +235,15 @@ public class GUI extends JFrame {
             for (File f : files) {
                 //System.out.println("\t" + f);
                 if (f.isDirectory()) {
-                    scanDir(f, model);
+                    System.out.println("\t parent=" + parent + "." + f.getName() );
+                    if( parent.length() == 0 )
+                        scanDir( f.getName() ,f, model);
+                    else
+                        scanDir( parent + "." + f.getName() ,f, model);
                 } else if (f.getAbsolutePath().endsWith(".class")) {
                     try {
-                        String className = f.getParent().replaceAll(".*/", "") + "." + f.getName().replace(".class", "");
+                        //String className = parent + "." + f.getParent().replaceAll(".*/", "") + "." + f.getName().replace(".class", "");
+                        String className = parent + "." + f.getName().replace(".class", "");
                         System.out.println("\t" + className);
                         Class<?> c = Class.forName(className);
                         ScaleClassAnnotation ann = c.getAnnotation(ScaleClassAnnotation.class);
@@ -261,7 +266,7 @@ public class GUI extends JFrame {
         DefaultListModel<String> model = new DefaultListModel<>();
         for (String pe : path) {
             File dir = new File(pe);
-            scanDir(dir, model);
+            scanDir("",dir, model);
         }
         return model;
     }
